@@ -1,5 +1,7 @@
 package com.docverify.model;
 
-public class verificationStatus {
-    
+public enum VerificationStatus {
+    GENUINE,
+    MODIFIED,
+    NOT_FOUND
 }

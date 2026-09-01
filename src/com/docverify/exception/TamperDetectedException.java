@@ -1,5 +1,8 @@
-package com.docverify.exception;
+package com.docverify.Exception;
 
-public class TamperDetectedException {
-    
+public class TamperDetectedException extends Exception {
+
+    public TamperDetectedException(String message) {
+        super(message);
+    }
 }
