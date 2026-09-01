@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Document {
 
@@ -18,7 +19,6 @@ public class Document {
     private List<VerificationResult> verificationHistory;
 
     public Document(
-            String documentId,
             String documentName,
             String holderName,
             String issuerName,
@@ -26,7 +26,7 @@ public class Document {
             String filePath,
             String documentHash) {
 
-        this.documentId = documentId;
+        this.documentId = UUID.randomUUID().toString();
         this.documentName = documentName;
         this.holderName = holderName;
         this.issuerName = issuerName;
