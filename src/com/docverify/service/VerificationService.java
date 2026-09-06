@@ -1,6 +1,7 @@
 package com.docverify.service;
 
 import com.docverify.Exception.DocumentNotFoundException;
+import com.docverify.Exception.TamperDetectedException;
 import com.docverify.model.Document;
 import com.docverify.model.VerificationResult;
 import com.docverify.model.VerificationStatus;
@@ -19,31 +20,33 @@ public class VerificationService {
     public VerificationResult verifyDocument(
             String documentId,
             String currentHash)
-            throws DocumentNotFoundException {
+            throws DocumentNotFoundException, TamperDetectedException {
 
         Document document =
                 documentService.findDocumentById(documentId);
 
-        VerificationStatus status;
-        String message;
-
-        if (Objects.equals(
+        if (!Objects.equals(
                 document.getDocumentHash(),
                 currentHash)) {
 
-            status = VerificationStatus.GENUINE;
-            message = "Document is genuine.";
+            VerificationResult result = new VerificationResult(
+                    document.getDocumentId(),
+                    VerificationStatus.MODIFIED,
+                    "Document has been modified.",
+                    LocalDateTime.now()
+            );
 
-        } else {
+            document.addVerification(result);
 
-            status = VerificationStatus.MODIFIED;
-            message = "Document has been modified.";
+            throw new TamperDetectedException(
+                    "Tampering detected for document: " + documentId
+            );
         }
 
         VerificationResult result = new VerificationResult(
                 document.getDocumentId(),
-                status,
-                message,
+                VerificationStatus.GENUINE,
+                "Document is genuine.",
                 LocalDateTime.now()
         );
 

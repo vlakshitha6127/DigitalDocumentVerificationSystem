@@ -3,6 +3,7 @@ package com.docverify.service;
 import com.docverify.Exception.DocumentNotFoundException;
 import com.docverify.Exception.ValidationException;
 import com.docverify.model.Document;
+import com.docverify.model.VerificationResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,7 @@ public class DocumentService {
             throws DocumentNotFoundException {
 
         for (Document document : documents) {
+
             if (document.getDocumentId().equals(documentId)) {
                 return document;
             }
@@ -59,5 +61,17 @@ public class DocumentService {
 
     public List<Document> getAllDocuments() {
         return new ArrayList<>(documents);
+    }
+
+    public List<VerificationResult> getVerificationHistory(
+            String documentId)
+            throws DocumentNotFoundException {
+
+        Document document =
+                findDocumentById(documentId);
+
+        return new ArrayList<>(
+                document.getVerificationHistory()
+        );
     }
 }
