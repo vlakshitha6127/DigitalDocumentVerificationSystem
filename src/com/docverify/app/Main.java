@@ -23,7 +23,8 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
 
-        DocumentService documentService = new DocumentService();
+        DocumentService documentService =
+                new DocumentService();
 
         VerificationService verificationService =
                 new VerificationService(documentService);
@@ -48,7 +49,86 @@ public class Main {
             user.performAction();
         }
 
-        System.out.println("\nDigital Document Verification System");
+        boolean running = true;
+
+        while (running) {
+
+            System.out.println(
+                    "\n===== DIGITAL DOCUMENT VERIFICATION SYSTEM ====="
+            );
+
+            System.out.println("1. Register Document");
+            System.out.println("2. Verify Document");
+            System.out.println("3. View Verification History");
+            System.out.println("4. View All Documents");
+            System.out.println("5. Exit");
+
+            System.out.print("Enter your choice: ");
+
+            String choice = scanner.nextLine();
+
+            switch (choice) {
+
+                case "1":
+
+                    registerDocument(
+                            scanner,
+                            documentService
+                    );
+
+                    break;
+
+                case "2":
+
+                    verifyDocument(
+                            scanner,
+                            documentService,
+                            verificationService
+                    );
+
+                    break;
+
+                case "3":
+
+                    viewVerificationHistory(
+                            scanner,
+                            documentService
+                    );
+
+                    break;
+
+                case "4":
+
+                    viewAllDocuments(
+                            documentService
+                    );
+
+                    break;
+
+                case "5":
+
+                    running = false;
+
+                    System.out.println(
+                            "Exiting system..."
+                    );
+
+                    break;
+
+                default:
+
+                    System.out.println(
+                            "Invalid choice. Please try again."
+                    );
+            }
+        }
+
+        scanner.close();
+    }
+
+    private static void registerDocument(
+            Scanner scanner,
+            DocumentService documentService) {
 
         System.out.print("Enter document name: ");
         String documentName = scanner.nextLine();
@@ -78,87 +158,144 @@ public class Main {
 
             documentService.registerDocument(document);
 
-            System.out.println("\nDocument registered successfully.");
             System.out.println(
-                    "Document ID: " + document.getDocumentId()
+                    "\nDocument registered successfully."
             );
 
+            System.out.println(
+                    "Document ID: " +
+                    document.getDocumentId()
+            );
+
+        } catch (ValidationException e) {
+
+            System.out.println(
+                    "Validation error: " +
+                    e.getMessage()
+            );
+
+        } catch (RuntimeException e) {
+
+            System.out.println(
+                    "File/Hash error: " +
+                    e.getMessage()
+            );
+        }
+    }
+
+    private static void verifyDocument(
+            Scanner scanner,
+            DocumentService documentService,
+            VerificationService verificationService) {
+
+        System.out.print("Enter document ID: ");
+        String documentId = scanner.nextLine();
+
+        try {
+
+            Document document =
+                    documentService.findDocumentById(
+                            documentId
+                    );
+
             String currentHash =
-                    HashUtil.generateFileHash(filePath);
+                    HashUtil.generateFileHash(
+                            document.getFilePath()
+                    );
 
             try {
 
                 VerificationResult result =
                         verificationService.verifyDocument(
-                                document.getDocumentId(),
+                                documentId,
                                 currentHash
                         );
 
                 System.out.println(
-                        "\nStatus: " + result.getStatus()
-                );
-
-                System.out.println(
-                        "Message: " + result.getMessage()
-                );
-
-            } catch (TamperDetectedException e) {
-
-                System.out.println(
-                        "Tampering error: " + e.getMessage()
-                );
-            }
-
-            try {
-
-                VerificationResult result =
-                        verificationService.verifyDocument(
-                                document.getDocumentId(),
-                                "tampered_hash"
-                        );
-
-                System.out.println(
-                        "\nStatus: " + result.getStatus()
-                );
-
-                System.out.println(
-                        "Message: " + result.getMessage()
-                );
-
-            } catch (TamperDetectedException e) {
-
-                System.out.println(
-                        "Tampering error: " + e.getMessage()
-                );
-            }
-
-            System.out.println("\nVerification History:");
-
-            List<VerificationResult> history =
-                    documentService.getVerificationHistory(
-                            document.getDocumentId()
-                    );
-
-            for (VerificationResult verification : history) {
-
-                System.out.println(
-                        "Document ID: " +
-                        verification.getDocumentId()
-                );
-
-                System.out.println(
-                        "Status: " +
-                        verification.getStatus()
+                        "\nStatus: " +
+                        result.getStatus()
                 );
 
                 System.out.println(
                         "Message: " +
-                        verification.getMessage()
+                        result.getMessage()
+                );
+
+                System.out.println(
+                        "Verification Time: " +
+                        result.getVerificationTime()
+                );
+
+            } catch (TamperDetectedException e) {
+
+                System.out.println(
+                        "Tampering error: " +
+                        e.getMessage()
+                );
+            }
+
+        } catch (DocumentNotFoundException e) {
+
+            System.out.println(
+                    e.getMessage()
+            );
+
+        } catch (RuntimeException e) {
+
+            System.out.println(
+                    "File/Hash error: " +
+                    e.getMessage()
+            );
+        }
+    }
+
+    private static void viewVerificationHistory(
+            Scanner scanner,
+            DocumentService documentService) {
+
+        System.out.print("Enter document ID: ");
+        String documentId = scanner.nextLine();
+
+        try {
+
+            List<VerificationResult> history =
+                    documentService.getVerificationHistory(
+                            documentId
+                    );
+
+            if (history.isEmpty()) {
+
+                System.out.println(
+                        "No verification history found."
+                );
+
+                return;
+            }
+
+            System.out.println(
+                    "\n===== VERIFICATION HISTORY ====="
+            );
+
+            for (VerificationResult result : history) {
+
+                System.out.println(
+                        "Document ID: " +
+                        result.getDocumentId()
+                );
+
+                System.out.println(
+                        "Status: " +
+                        result.getStatus()
+                );
+
+                System.out.println(
+                        "Message: " +
+                        result.getMessage()
                 );
 
                 System.out.println(
                         "Time: " +
-                        verification.getVerificationTime()
+                        result.getVerificationTime()
                 );
 
                 System.out.println(
@@ -166,23 +303,68 @@ public class Main {
                 );
             }
 
-        } catch (ValidationException e) {
-
-            System.out.println(
-                    "Validation error: " + e.getMessage()
-            );
-
         } catch (DocumentNotFoundException e) {
 
-            System.out.println(e.getMessage());
-
-        } catch (RuntimeException e) {
-
             System.out.println(
-                    "File/Hash error: " + e.getMessage()
+                    e.getMessage()
             );
         }
+    }
 
-        scanner.close();
+    private static void viewAllDocuments(
+            DocumentService documentService) {
+
+        List<Document> documents =
+                documentService.getAllDocuments();
+
+        if (documents.isEmpty()) {
+
+            System.out.println(
+                    "No documents registered."
+            );
+
+            return;
+        }
+
+        System.out.println(
+                "\n===== REGISTERED DOCUMENTS ====="
+        );
+
+        for (Document document : documents) {
+
+            System.out.println(
+                    "Document ID: " +
+                    document.getDocumentId()
+            );
+
+            System.out.println(
+                    "Document Name: " +
+                    document.getDocumentName()
+            );
+
+            System.out.println(
+                    "Holder: " +
+                    document.getHolderName()
+            );
+
+            System.out.println(
+                    "Issuer: " +
+                    document.getIssuerName()
+            );
+
+            System.out.println(
+                    "Issue Date: " +
+                    document.getIssueDate()
+            );
+
+            System.out.println(
+                    "File Path: " +
+                    document.getFilePath()
+            );
+
+            System.out.println(
+                    "-----------------------------"
+            );
+        }
     }
 }

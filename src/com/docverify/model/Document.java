@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.io.Serializable;
 
-public class Document {
+public class Document implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final String documentId;
     private String documentName;
@@ -98,6 +101,7 @@ public class Document {
 
     @Override
     public boolean equals(Object obj) {
+
         if (this == obj) {
             return true;
         }
@@ -108,7 +112,10 @@ public class Document {
 
         Document other = (Document) obj;
 
-        return Objects.equals(documentId, other.documentId);
+        return Objects.equals(
+                documentId,
+                other.documentId
+        );
     }
 
     @Override

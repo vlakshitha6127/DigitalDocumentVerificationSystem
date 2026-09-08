@@ -10,10 +10,13 @@ import java.util.List;
 
 public class DocumentService {
 
+    private DocumentStorage documentStorage;
+
     private List<Document> documents;
 
     public DocumentService() {
-        documents = new ArrayList<>();
+        documentStorage = new DocumentStorage();
+        documents = documentStorage.loadDocuments();
     }
 
     public void registerDocument(Document document)
@@ -42,6 +45,7 @@ public class DocumentService {
         }
 
         documents.add(document);
+        documentStorage.saveDocument(document);
     }
 
     public Document findDocumentById(String documentId)

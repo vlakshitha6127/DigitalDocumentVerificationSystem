@@ -1,8 +1,11 @@
 package com.docverify.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class VerificationResult {
+public class VerificationResult implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final String documentId;
     private final VerificationStatus status;
