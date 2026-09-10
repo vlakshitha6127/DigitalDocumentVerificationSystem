@@ -1,66 +1,40 @@
 package com.docverify.util;
-
+ 
+import com.docverify.Exception.FileAccessException;
+ 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
+ 
 public class HashUtil {
-
+ 
+    private HashUtil() {}
+ 
     public static String generateHash(String content) {
-        try {
-            MessageDigest messageDigest =
-                    MessageDigest.getInstance("SHA-256");
-
-            byte[] hashBytes = messageDigest.digest(
-                    content.getBytes()
-            );
-
-            StringBuilder hash = new StringBuilder();
-
-            for (byte b : hashBytes) {
-                hash.append(String.format("%02x", b));
-            }
-
-            return hash.toString();
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(
-                    "Hashing algorithm not found", e
-            );
-        }
+        return hashBytes(content.getBytes());
     }
-
+ 
     public static String generateFileHash(String filePath) {
         try {
-            byte[] fileBytes = Files.readAllBytes(
-                    Path.of(filePath)
-            );
-
-            MessageDigest messageDigest =
-                    MessageDigest.getInstance("SHA-256");
-
-            byte[] hashBytes =
-                    messageDigest.digest(fileBytes);
-
+            return hashBytes(Files.readAllBytes(Path.of(filePath)));
+        } catch (IOException e) {
+            throw new FileAccessException("Unable to read file: " + filePath, e);
+        }
+    }
+ 
+    private static String hashBytes(byte[] input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(input);
             StringBuilder hash = new StringBuilder();
-
             for (byte b : hashBytes) {
                 hash.append(String.format("%02x", b));
             }
-
             return hash.toString();
-
-        } catch (IOException e) {
-            throw new RuntimeException(
-                    "Unable to read file", e
-            );
-
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(
-                    "Hashing algorithm not found", e
-            );
+            throw new FileAccessException("Hashing algorithm not found", e);
         }
     }
 }
